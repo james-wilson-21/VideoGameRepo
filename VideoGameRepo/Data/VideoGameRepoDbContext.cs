@@ -23,6 +23,14 @@ namespace VideoGameRepo.Data
                 .Property(b => b.Cost)
                 .HasPrecision(18, 2);
 
+            modelBuilder.Entity<Game>()
+                .Property(b => b.Shipping)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Game>()
+                .Property(b => b.Status)
+                .HasDefaultValue(false);
+
         }
     }
 }

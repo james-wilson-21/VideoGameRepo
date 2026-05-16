@@ -22,18 +22,46 @@
             <th>
                 @Html.DisplayNameFor(model => model.Cost)
             </th>
+            <th>
+                @Html.DisplayNameFor(Model => Model.Shipping)
+            </th>
+            <th>
+                Total Cost
+            </th>
+             <th>
+                 @Html.DisplayNameFor(Model => Model.Status)
+             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
 @foreach (var item in Model) {
-        <tr>
+                <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.Title)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Cost)
             </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Shipping)
+            </td>
+            <td>
+                @(item.Cost + item.Shipping)
+            </td>
+             <td>
+                @* @Html.DisplayFor(modelItem => item.Status) *@
+                <form asp-action="ToggleStatus" asp-route-id="@item.Id" method="post" style="display:inline">
+                       @if (item.Status)
+                           {
+                               <button type="submit" class="btn btn-sm btn-success">Sold</button>
+                           }
+                           else
+                           {
+                               <button type="submit"' class-="btn btn-sm btn-danger">Unsold</button>
+                           }
+                </form>
+             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                 <a asp-action="Details" asp-route-id="@item.Id">Details</a> |

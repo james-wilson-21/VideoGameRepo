@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.WebSockets;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -54,7 +55,7 @@ namespace VideoGameRepo
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Cost")] Game game)
+        public async Task<IActionResult> Create([Bind("Id,Title,Cost,Shipping")] Game game)
         {
             if (ModelState.IsValid)
             {
@@ -86,7 +87,7 @@ namespace VideoGameRepo
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Cost")] Game game)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Cost,Shipping,Status")] Game game)
         {
             if (id != game.Id)
             {
@@ -114,6 +115,24 @@ namespace VideoGameRepo
                 return RedirectToAction(nameof(Index));
             }
             return View(game);
+        }
+
+        // Change Status Button
+        public async Task<IActionResult> ToggleStatus(int id)
+        {
+            var game = await _context.Games.FindAsync(id);
+
+            if (game == null)
+            {
+                return NotFound();
+            }
+
+            game.Status = !game.Status;
+
+            _context.Update(game);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Games/Delete/5

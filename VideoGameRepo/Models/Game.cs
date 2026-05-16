@@ -9,5 +9,9 @@ namespace VideoGameRepo.Models
         [Required]
         public string Title { get; set; } = string.Empty;
         public decimal Cost { get; set; }
+
+        public decimal Shipping {  get; set; }
+
+        public bool Status { get; set; }
     }
 }
