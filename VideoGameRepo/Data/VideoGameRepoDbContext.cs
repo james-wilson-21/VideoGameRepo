@@ -31,6 +31,10 @@ namespace VideoGameRepo.Data
                 .Property(b => b.Status)
                 .HasDefaultValue(false);
 
+            modelBuilder.Entity<Game>()
+                .Property(b => b.Image)
+                .HasMaxLength(200);
+
         }
     }
 }

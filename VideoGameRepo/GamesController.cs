@@ -14,10 +14,12 @@ namespace VideoGameRepo
     public class GamesController : Controller
     {
         private readonly VideoGameRepoDbContext _context;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public GamesController(VideoGameRepoDbContext context)
+        public GamesController(VideoGameRepoDbContext context, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         // GET: Games
@@ -55,11 +57,32 @@ namespace VideoGameRepo
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Cost,Shipping")] Game game)
+        public async Task<IActionResult> Create([Bind("Id,Title,Cost,Shipping")] Game game, IFormFile imageFile)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(game);
+                if (imageFile != null && imageFile.Length > 0)
+                {
+                    string uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(imageFile.FileName);
+
+                    string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images");
+                    string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    if (!Directory.Exists(uploadsFolder))
+                    {
+                        Directory.CreateDirectory(uploadsFolder);
+                    }
+
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await imageFile.CopyToAsync(fileStream);
+                    }
+
+                    game.Image = uniqueFileName;
+                }
+
+
+                    _context.Add(game);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -87,7 +110,7 @@ namespace VideoGameRepo
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Cost,Shipping,Status")] Game game)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Cost,Shipping,Status")] Game game, IFormFile imageFile)
         {
             if (id != game.Id)
             {
@@ -96,8 +119,43 @@ namespace VideoGameRepo
 
             if (ModelState.IsValid)
             {
+                
                 try
                 {
+                    var existingGame = await _context.Games.AsNoTracking().FirstOrDefaultAsync(g => g.Id == id);
+
+                    if (existingGame == null)
+                    {
+                        return NotFound();
+                    }
+
+                    if (imageFile != null && imageFile.Length > 0)
+                    {
+                        string uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(imageFile.FileName);
+                        string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images");
+                        string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                        if (!Directory.Exists(uploadsFolder))
+                        {
+                            Directory.CreateDirectory(uploadsFolder);
+                        }
+
+                        using (var fileStream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await imageFile.CopyToAsync(fileStream);
+                        }
+
+                        game.Image = uniqueFileName;
+
+                        if (!string.IsNullOrEmpty(existingGame.Image))
+                        {
+                            string oldFilePath = Path.Combine(uploadsFolder, existingGame.Image); ;
+                            if (System.IO.File.Exists(oldFilePath))
+                            {
+                                System.IO.File.Delete(oldFilePath);
+                            }
+                        }
+                    }
                     _context.Update(game);
                     await _context.SaveChangesAsync();
                 }
