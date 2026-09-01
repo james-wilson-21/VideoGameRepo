@@ -19,9 +19,10 @@
             <th>
                 @Html.DisplayNameFor(model => model.Image)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Title)
-            </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Title) (@Html.DisplayNameFor(model => model.Category))
+                </th>
+
             <th>
                 @Html.DisplayNameFor(model => model.Cost)
             </th>
@@ -49,7 +50,8 @@
     }
                         </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Title)
+                @* @Html.DisplayFor(modelItem => item.Title)  *@
+                @Html.DisplayFor(modelItem => item.Title) @($"({item.Category})")
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Cost)

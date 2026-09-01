@@ -20,6 +20,11 @@ namespace VideoGameRepo.Data
                 .HasMaxLength(200);
 
             modelBuilder.Entity<Game>()
+                .Property(b => b.Category)
+                .IsRequired()
+                .HasMaxLength(200);
+
+            modelBuilder.Entity<Game>()
                 .Property(b => b.Cost)
                 .HasPrecision(18, 2);
 

@@ -57,7 +57,7 @@ namespace VideoGameRepo
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Cost,Shipping")] Game game, IFormFile imageFile)
+        public async Task<IActionResult> Create([Bind("Id,Title,Cost,Shipping,Category")] Game game, IFormFile imageFile)
         {
             if (ModelState.IsValid)
             {
@@ -110,7 +110,7 @@ namespace VideoGameRepo
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Cost,Shipping,Status")] Game game, IFormFile imageFile)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Cost,Shipping,Status,Category")] Game game, IFormFile? imageFile)
         {
             if (id != game.Id)
             {
@@ -119,7 +119,7 @@ namespace VideoGameRepo
 
             if (ModelState.IsValid)
             {
-                
+
                 try
                 {
                     var existingGame = await _context.Games.AsNoTracking().FirstOrDefaultAsync(g => g.Id == id);
@@ -155,6 +155,10 @@ namespace VideoGameRepo
                                 System.IO.File.Delete(oldFilePath);
                             }
                         }
+                    }
+                    else
+                    {
+                        game.Image = existingGame.Image;
                     }
                     _context.Update(game);
                     await _context.SaveChangesAsync();
