@@ -23,9 +23,41 @@ namespace VideoGameRepo
         }
 
         // GET: Games
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string sortOrder)
         {
-            return View(await _context.Games.ToListAsync());
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["TitleSortParm"] = sortOrder == "title_asc" ? "title_desc" : "title_asc";
+            ViewData["CategorySortParm"] = sortOrder == "category_asc" ? "category_desc" : "category_asc";
+            ViewData["CostSortParm"] = sortOrder == "cost_asc" ? "cost_desc" : "cost_asc";
+
+            var titles = from t in _context.Games
+                         select t;
+
+            switch (sortOrder)
+            {
+                case "title_desc":
+                    titles = titles.OrderByDescending(t => t.Title);
+                    break;
+                case "title_asc":
+                    titles = titles.OrderBy(t => t.Title);
+                    break;
+                case "category_desc":
+                    titles = titles.OrderByDescending(t => t.Category);
+                    break;
+                case "category_asc":
+                    titles = titles.OrderBy(t => t.Category);
+                    break;
+                case "cost_desc":
+                    titles = titles.OrderByDescending(t => t.Cost);
+                    break;
+                case "cost_asc":
+                    titles = titles.OrderBy(t => t.Cost);
+                    break;
+                default:
+                titles = titles.OrderBy(t => t.Title);
+                    break;
+            }
+            return View(await titles.AsNoTracking().ToListAsync());
         }
 
         // GET: Games/Details/5
