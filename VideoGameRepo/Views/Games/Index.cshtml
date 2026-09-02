@@ -1,7 +1,138 @@
 ﻿@model IEnumerable<VideoGameRepo.Models.Game>
 
 @{
-    ViewData["Title"] = "Index";
+    string currentViewMode = ViewData["CurrentViewMode"]?.ToString() ?? "list";
+    string currentSort = ViewData["CurrentSore"]?.ToString() ?? "";
+}
+
+<div class="d-flex justfy-content-between align-items-center mb-3">
+    <h1>Repository</h1>
+
+    <div claass="btn-group">
+        <a asp-action="Index"
+        asp-route-viewMode="list"
+        asp-route-sortOrder="@currentSort"
+        class="btn btn-outline-secondary @(currentViewMode == "list" ? "active" : "")">List View</a>
+        <a asp-action="Index"
+           asp-route-viewMode="grid"
+           asp-route-sortOrder="@currentSort"
+           class="btn btn-outline-secondary @(currentViewMode == "grid" ? "active" : "")">
+            Large Image Grid
+        </a>
+    </div>
+</div>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New</a>
+</p>
+
+@if (currentViewMode == "grid")
+{
+    <div class="row">
+        @foreach (var item in Model)
+        {
+            <div class="col col mb-4">
+                <div class="card h-100 shadow-sm">
+
+                    @if (!string.IsNullOrEmpty(item.Image))
+                    {
+                        <img src="~/images/@item.Image" class="card-img-top" style="height: 250px; object-fit: cover;" alt="$$item.Title" />
+                    } else
+                    {
+                                           <div class="bg-light text-center align-content-center text-muted" style="height: 250px;">
+                            No Image Available
+                        </div>
+                    }
+
+                    <div class="caard-body">
+                        <h5 class="card-title text-truncate">$item.Title</h5>
+                        <p class-"card-text text-muted mb-1">
+                            <strong>Category:</strong> @item.Category
+                        </p>
+                        <p class="caaard-text text-success font-weight-bold">
+                            @item.Cost.ToString("C")
+                        </p>
+                    </div>
+
+                    <div class="card-footer bg-transparent border-top-0 d-flex justify-content-between">
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">Details</a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Delete</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Image)
+                </th>
+                <th><a asp-action="Index" asp-route-sortOrder="@ViewData["TitleSortParm"]" asp-route-viewMode="@currentViewMode">Title</a></th>
+                <th><a asp-action="Index" asp-route-sortOrder="@ViewData["CategorySortParm"]" asp-route-viewMode="@currentViewMode">Category</a></th>
+                <th><a asp-action="Index" asp-route-sortOrder="@ViewData["CostSortParm"]" asp-route-viewMode="@currentViewMode">Cost</a></th>
+                <th>
+                    @Html.DisplayNameFor(Model => Model.Shipping)
+                </th>
+                <th>
+                    Total Cost
+                </th>
+                <th>
+                    @Html.DisplayNameFor(Model => Model.Status)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @if (!string.IsNullOrEmpty(item.Image))
+                        {
+                            <img src="~/images/@item.Image" alt="@item.Title" width="100" class="img-thumbnail" />
+                        }
+                        else
+                        {
+                            <!-- Optional: Show a placeholder if no image exists -->
+                            <img src="~/images/no-image.png" alt="No Image Available" width="100" class="img-thumbnail" />
+                        }
+                    </td>
+                    <td>@Html.DisplayFor(modelItem => item.Title)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Category)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Cost)</td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Shipping)
+                    </td>
+                    <td>
+                        @(item.Cost + item.Shipping)
+                    </td>
+                    <td>
+                        @* @Html.DisplayFor(modelItem => item.Status) *@
+                        <form asp-action="ToggleStatus" asp-route-id="@item.Id" method="post" style="display:inline">
+                            @if (item.Status)
+                            {
+                                <button type="submit" class="btn btn-sm btn-success">Sold</button>
+                            }
+                            else
+                            {
+                                <button type="submit" ' class-="btn btn-sm btn-danger">Unsold</button>
+                            }
+                        </form>
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                        <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 }
 
 <div class="flex-container">
@@ -9,83 +140,3 @@
     <h1>Trade Me Catalogue</h1>
 </div>
 
-<div class="item-table">
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Image)
-            </th>
-                <th>
-                    <a asp-action="Index" asp-route-sortOrder="@ViewData["TitleSortParm"]">@Html.DisplayNameFor(model => model.Title)</a>
-                </th>
-                <th>
-                    <a asp-action="Index" asp-route-sortOrder="@ViewData["CategorySortParm"]">@Html.DisplayNameFor(model => model.Category)</a>
-                </th>
-            <th>
-                <a asp-action="Index" asp-route-sortOrder="@ViewData["CostSortParm"]">@Html.DisplayNameFor(model => model.Cost)</a>
-            </th>
-            <th>
-                @Html.DisplayNameFor(Model => Model.Shipping)
-            </th>
-            <th>
-                Total Cost
-            </th>
-             <th>
-                 @Html.DisplayNameFor(Model => Model.Status)
-             </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-                <tr>
-                    <td>@if (!string.IsNullOrEmpty(item.Image)){
-                            <img src="~/images/@item.Image" alt="@item.Title" width="100" class="img-thumbnail" />
-                    } else
-                    {
-        <!-- Optional: Show a placeholder if no image exists -->
-        <img src="~/images/no-image.png" alt="No Image Available" width="100" class="img-thumbnail" />
-    }
-                        </td>
-            <td>
-                 @Html.DisplayFor(modelItem => item.Title) 
-            </td>
-            <td>
-                 @Html.DisplayFor(modelItem => item.Category)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Cost)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Shipping)
-            </td>
-            <td>
-                @(item.Cost + item.Shipping)
-            </td>
-             <td>
-                @* @Html.DisplayFor(modelItem => item.Status) *@
-                <form asp-action="ToggleStatus" asp-route-id="@item.Id" method="post" style="display:inline">
-                       @if (item.Status)
-                           {
-                               <button type="submit" class="btn btn-sm btn-success">Sold</button>
-                           }
-                           else
-                           {
-                               <button type="submit"' class-="btn btn-sm btn-danger">Unsold</button>
-                           }
-                </form>
-             </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
-</div>

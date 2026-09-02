@@ -23,13 +23,14 @@ namespace VideoGameRepo
         }
 
         // GET: Games
-        public async Task<IActionResult> Index(string sortOrder)
+        public async Task<IActionResult> Index(string sortOrder, string viewMode)
         {
             ViewData["CurrentSort"] = sortOrder;
             ViewData["TitleSortParm"] = sortOrder == "title_asc" ? "title_desc" : "title_asc";
             ViewData["CategorySortParm"] = sortOrder == "category_asc" ? "category_desc" : "category_asc";
             ViewData["CostSortParm"] = sortOrder == "cost_asc" ? "cost_desc" : "cost_asc";
 
+            ViewData["CurrentViewMode"] = string.IsNullOrEmpty(viewMode) ? "list" : viewMode;
             var titles = from t in _context.Games
                          select t;
 
